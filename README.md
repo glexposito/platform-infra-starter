@@ -3,32 +3,32 @@
 Minimal Terraform project for Azure Container Apps with a clean split between:
 
 - platform resources
-- app-specific resources
+- container app resources
 
 Terraform roots:
 
 - `platform/`
-- `app/`
+- `container-app/`
 
 Environment values:
 
 - `env/dev/platform.tfvars`
-- `env/dev/app.tfvars`
+- `env/dev/container-app.tfvars`
 - `env/prod/platform.tfvars`
-- `env/prod/app.tfvars`
+- `env/prod/container-app.tfvars`
 
 Backend config:
 
 - `backend/dev.platform.hcl`
-- `backend/dev.app.hcl`
+- `backend/dev.container-app.hcl`
 - `backend/prod.platform.hcl`
-- `backend/prod.app.hcl`
+- `backend/prod.container-app.hcl`
 
 The `.tfvars` files only define naming tokens such as `stack_name`, `app_name`, `environment`, and `region_code`. Resource names are generated in Terraform to match the existing pattern.
 
 The backend `.hcl` files define where Terraform state is stored in Azure Storage.
 
-The app `.tfvars` files also define the platform remote state lookup object used by `terraform_remote_state`.
+The container app `.tfvars` files also define the platform remote state lookup object used by `terraform_remote_state`.
 
 Example:
 
@@ -47,13 +47,13 @@ The `platform` stack creates:
 - storage account
 - Container Apps environment
 
-The `app` stack creates:
+The `container-app` stack creates:
 
 - one Container App
 
-`app` reads the `platform` outputs through `terraform_remote_state`, so the two states stay separate.
+`container-app` reads the `platform` outputs through `terraform_remote_state`, so the two states stay separate.
 
-Optional Key Vault support is included for app secrets:
+Optional Key Vault support is included for container app secrets:
 
 - set `secret_environment_variables` with `key_vault_secret_id`
 - set `key_vault_id` to grant the Container App identity `Key Vault Secrets User` on that vault
@@ -94,28 +94,28 @@ terraform plan -var-file=../env/dev/platform.tfvars
 terraform apply -var-file=../env/dev/platform.tfvars
 ```
 
-Then initialize and apply app:
+Then initialize and apply container app:
 
 ```bash
-cd app
-terraform init -backend-config=../backend/dev.app.hcl
-terraform plan -var-file=../env/dev/app.tfvars
-terraform apply -var-file=../env/dev/app.tfvars
+cd container-app
+terraform init -backend-config=../backend/dev.container-app.hcl
+terraform plan -var-file=../env/dev/container-app.tfvars
+terraform apply -var-file=../env/dev/container-app.tfvars
 ```
 
 For production, use:
 
 - `../backend/prod.platform.hcl`
-- `../backend/prod.app.hcl`
+- `../backend/prod.container-app.hcl`
 - `../env/prod/platform.tfvars`
-- `../env/prod/app.tfvars`
+- `../env/prod/container-app.tfvars`
 
 ## GitHub Actions
 
 There are two independent manual workflows:
 
 - `.github/workflows/deploy-platform.yml`
-- `.github/workflows/deploy-app.yml`
+- `.github/workflows/deploy-container-app.yml`
 
 Both workflows let you choose:
 
@@ -127,14 +127,14 @@ The platform workflow uses the matching backend file:
 - `dev` -> `backend/dev.platform.hcl`
 - `prod` -> `backend/prod.platform.hcl`
 
-The app workflow uses the matching backend file. The platform remote state lookup is defined in the app `.tfvars` file for each environment:
+The container app workflow uses the matching backend file. The platform remote state lookup is defined in the container app `.tfvars` file for each environment:
 
-- `dev` -> `backend/dev.app.hcl` and `platform/dev/platform.tfstate`
-- `prod` -> `backend/prod.app.hcl` and `platform/prod/platform.tfstate`
+- `dev` -> `backend/dev.container-app.hcl` and `platform/dev/platform.tfstate`
+- `prod` -> `backend/prod.container-app.hcl` and `platform/prod/platform.tfstate`
 
 ## Notes
 
 - Backend blocks use `azurerm`.
 - Update the backend `.hcl` files if your Terraform state storage values differ from this setup.
 - Resource names match the existing repo naming pattern.
-- This project keeps the resource definitions directly in `platform/` and `app/`, split into small files by concern to stay simple and readable.
+- This project keeps the resource definitions directly in `platform/` and `container-app/`, split into small files by concern to stay simple and readable.
