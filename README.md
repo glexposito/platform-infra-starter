@@ -19,10 +19,10 @@ Environment values:
 
 Backend config:
 
-- `backend/dev.platform.hcl`
-- `backend/dev.container-app.hcl`
-- `backend/prod.platform.hcl`
-- `backend/prod.container-app.hcl`
+- `backend/dev.platform.tfbackend`
+- `backend/dev.container-app.tfbackend`
+- `backend/prod.platform.tfbackend`
+- `backend/prod.container-app.tfbackend`
 
 The `.tfvars` files only define naming tokens such as `stack_name`, `app_name`, `environment`, and `region_code`. Resource names are generated in Terraform to match the existing pattern.
 
@@ -89,7 +89,7 @@ Initialize and apply platform first:
 
 ```bash
 cd platform
-terraform init -backend-config=../backend/dev.platform.hcl
+terraform init -backend-config=../backend/dev.platform.tfbackend
 terraform plan -var-file=../env/dev/platform.tfvars
 terraform apply -var-file=../env/dev/platform.tfvars
 ```
@@ -98,15 +98,15 @@ Then initialize and apply container app:
 
 ```bash
 cd container-app
-terraform init -backend-config=../backend/dev.container-app.hcl
+terraform init -backend-config=../backend/dev.container-app.tfbackend
 terraform plan -var-file=../env/dev/container-app.tfvars
 terraform apply -var-file=../env/dev/container-app.tfvars
 ```
 
 For production, use:
 
-- `../backend/prod.platform.hcl`
-- `../backend/prod.container-app.hcl`
+- `../backend/prod.platform.tfbackend`
+- `../backend/prod.container-app.tfbackend`
 - `../env/prod/platform.tfvars`
 - `../env/prod/container-app.tfvars`
 
@@ -124,17 +124,17 @@ Both workflows let you choose:
 
 The platform workflow uses the matching backend file:
 
-- `dev` -> `backend/dev.platform.hcl`
-- `prod` -> `backend/prod.platform.hcl`
+- `dev` -> `backend/dev.platform.tfbackend`
+- `prod` -> `backend/prod.platform.tfbackend`
 
 The container app workflow uses the matching backend file. The platform remote state lookup is defined in the container app `.tfvars` file for each environment:
 
-- `dev` -> `backend/dev.container-app.hcl` and `platform/dev/platform.tfstate`
-- `prod` -> `backend/prod.container-app.hcl` and `platform/prod/platform.tfstate`
+- `dev` -> `backend/dev.container-app.tfbackend` and `platform/dev/platform.tfstate`
+- `prod` -> `backend/prod.container-app.tfbackend` and `platform/prod/platform.tfstate`
 
 ## Notes
 
 - Backend blocks use `azurerm`.
-- Update the backend `.hcl` files if your Terraform state storage values differ from this setup.
+- Update the backend `.tfbackend` files if your Terraform state storage values differ from this setup.
 - Resource names match the existing repo naming pattern.
 - This project keeps the resource definitions directly in `platform/` and `container-app/`, split into small files by concern to stay simple and readable.

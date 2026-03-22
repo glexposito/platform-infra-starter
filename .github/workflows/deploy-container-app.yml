@@ -50,12 +50,12 @@ jobs:
               "dev": {
                   "environment_name": "dev",
                   "container_app_tfvars": "env/dev/container-app.tfvars",
-                  "container_app_backend_config": "backend/dev.container-app.hcl",
+                  "container_app_backend_config": "backend/dev.container-app.tfbackend",
               },
               "prod": {
                   "environment_name": "prod",
                   "container_app_tfvars": "env/prod/container-app.tfvars",
-                  "container_app_backend_config": "backend/prod.container-app.hcl",
+                  "container_app_backend_config": "backend/prod.container-app.tfbackend",
               },
           }
 

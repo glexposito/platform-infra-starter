@@ -50,12 +50,12 @@ jobs:
               "dev": {
                   "environment_name": "dev",
                   "platform_tfvars": "env/dev/platform.tfvars",
-                  "platform_backend_config": "backend/dev.platform.hcl",
+                  "platform_backend_config": "backend/dev.platform.tfbackend",
               },
               "prod": {
                   "environment_name": "prod",
                   "platform_tfvars": "env/prod/platform.tfvars",
-                  "platform_backend_config": "backend/prod.platform.hcl",
+                  "platform_backend_config": "backend/prod.platform.tfbackend",
               },
           }
 
