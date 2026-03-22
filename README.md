@@ -28,6 +28,8 @@ The `.tfvars` files only define naming tokens such as `stack_name`, `app_name`, 
 
 The backend `.hcl` files define where Terraform state is stored in Azure Storage.
 
+The app `.tfvars` files also define the shared remote state lookup values used by `terraform_remote_state`.
+
 The `shared` stack creates:
 
 - resource group
@@ -39,6 +41,10 @@ The `app` stack creates:
 - one Container App
 
 `app` reads the `shared` outputs through `terraform_remote_state`, so the two states stay separate.
+
+To keep Azure Storage Account naming valid, the shared stack uses a short fixed prefix for that resource name:
+
+- `stplat${environment}${region_code}`
 
 ## Usage
 
@@ -99,6 +105,6 @@ The app workflow uses the matching backend file. The shared state key is defined
 ## Notes
 
 - Backend blocks use `azurerm`.
-- The backend `.hcl` files currently contain placeholder values and must be updated with your real Azure state storage settings.
+- Update the backend `.hcl` files if your Terraform state storage values differ from this setup.
 - Resource names match the existing repo naming pattern.
-- This project reuses the repository modules under `../modules/` directly from the Terraform roots.
+- This project keeps the resource definitions directly in `shared/` and `app/`, split into small files by concern to stay simple and readable.

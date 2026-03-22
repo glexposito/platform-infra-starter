@@ -1,16 +1,13 @@
 variable "shared_state_resource_group_name" {
-  type    = string
-  default = "rg-tfstate"
+  type = string
 }
 
 variable "shared_state_storage_account_name" {
-  type    = string
-  default = "sttfstate123"
+  type = string
 }
 
 variable "shared_state_container_name" {
-  type    = string
-  default = "tfstate"
+  type = string
 }
 
 variable "shared_state_key" {
@@ -76,16 +73,6 @@ variable "secret_environment_variables" {
   }))
   default   = {}
   sensitive = true
-}
-
-variable "registry_server" {
-  type    = string
-  default = null
-}
-
-variable "acr_id" {
-  type    = string
-  default = null
 }
 
 variable "tags" {
