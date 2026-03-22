@@ -1,17 +1,10 @@
-variable "shared_state_resource_group_name" {
-  type = string
-}
-
-variable "shared_state_storage_account_name" {
-  type = string
-}
-
-variable "shared_state_container_name" {
-  type = string
-}
-
-variable "shared_state_key" {
-  type = string
+variable "platform_state" {
+  type = object({
+    resource_group_name  = string
+    storage_account_name = string
+    container_name       = string
+    key                  = string
+  })
 }
 
 variable "region_code" {
@@ -73,6 +66,11 @@ variable "secret_environment_variables" {
   }))
   default   = {}
   sensitive = true
+}
+
+variable "key_vault_id" {
+  type    = string
+  default = null
 }
 
 variable "tags" {

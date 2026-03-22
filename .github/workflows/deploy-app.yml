@@ -49,12 +49,12 @@ jobs:
           env_mapping = {
               "dev": {
                   "environment_name": "dev",
-                  "app_tfvars": "env/dev.app.tfvars",
+                  "app_tfvars": "env/dev/app.tfvars",
                   "app_backend_config": "backend/dev.app.hcl",
               },
               "prod": {
                   "environment_name": "prod",
-                  "app_tfvars": "env/prod.app.tfvars",
+                  "app_tfvars": "env/prod/app.tfvars",
                   "app_backend_config": "backend/prod.app.hcl",
               },
           }

@@ -1,7 +1,7 @@
 resource "azurerm_container_app" "this" {
   name                         = local.container_app_name
-  container_app_environment_id = data.terraform_remote_state.shared.outputs.container_app_environment_id
-  resource_group_name          = data.terraform_remote_state.shared.outputs.resource_group_name
+  container_app_environment_id = data.terraform_remote_state.platform.outputs.container_app_environment_id
+  resource_group_name          = data.terraform_remote_state.platform.outputs.resource_group_name
   revision_mode                = var.revision_mode
   tags                         = local.tags
 
