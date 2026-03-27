@@ -9,7 +9,16 @@ resource "azurerm_container_group" "this" {
   tags                = var.tags
 
   identity {
-    type = "SystemAssigned"
+    type         = var.acr_pull_identity_id == null ? "SystemAssigned" : "SystemAssigned, UserAssigned"
+    identity_ids = var.acr_pull_identity_id == null ? null : [var.acr_pull_identity_id]
+  }
+
+  dynamic "image_registry_credential" {
+    for_each = var.registry_server == null ? [] : [var.registry_server]
+    content {
+      server                    = var.registry_server
+      user_assigned_identity_id = var.acr_pull_identity_id
+    }
   }
 
   container {

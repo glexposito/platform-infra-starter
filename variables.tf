@@ -27,6 +27,16 @@ variable "container_image" {
   type = string
 }
 
+variable "registry_server" {
+  type    = string
+  default = null
+}
+
+variable "acr_id" {
+  type    = string
+  default = null
+}
+
 variable "container_cpu" {
   type    = number
   default = 0.25

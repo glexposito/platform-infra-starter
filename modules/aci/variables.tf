@@ -18,6 +18,16 @@ variable "container_image" {
   type = string
 }
 
+variable "registry_server" {
+  type    = string
+  default = null
+}
+
+variable "acr_pull_identity_id" {
+  type    = string
+  default = null
+}
+
 variable "container_cpu" {
   type = number
 }

@@ -27,6 +27,15 @@ The `.tfvars` files define naming tokens such as `stack_name`, `app_name`, `envi
 
 The backend `.tfbackend` files define where Terraform state is stored in Azure Storage.
 
+Private ACR images are supported with a managed identity:
+
+```hcl
+container_image   = "myregistry.azurecr.io/myapp:latest"
+acr_id            = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.ContainerRegistry/registries/<acr-name>"
+```
+
+When `acr_id` is set, this repository derives the ACR login server automatically, creates a user-assigned identity, grants it `AcrPull` on the registry, and configures ACI to use that identity for the image pull. If `acr_id` is null, no registry configuration is added and ACI will only be able to pull public images unless you explicitly set `registry_server` for another registry flow.
+
 Optional Key Vault support is included for an existing Key Vault:
 
 - set `key_vault_id` so Terraform can read secrets from that vault
