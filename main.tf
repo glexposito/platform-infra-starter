@@ -50,6 +50,10 @@ data "azurerm_container_registry" "this" {
 module "aci" {
   source = "./modules/aci"
 
+  depends_on = [
+    azurerm_role_assignment.acr_pull,
+  ]
+
   name                         = local.container_group_name
   location                     = azurerm_resource_group.this.location
   resource_group_name          = azurerm_resource_group.this.name
