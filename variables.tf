@@ -31,11 +31,21 @@ variable "container_image" {
 variable "container_image_repository" {
   type    = string
   default = null
+
+  validation {
+    condition     = var.acr_name != null || var.container_image_repository == null
+    error_message = "container_image_repository can only be set when acr_name is set."
+  }
 }
 
 variable "container_image_tag" {
   type    = string
   default = "latest"
+
+  validation {
+    condition     = var.acr_name != null || var.container_image_tag == "latest"
+    error_message = "container_image_tag can only be customized when acr_name is set."
+  }
 }
 
 variable "acr_name" {
@@ -130,6 +140,14 @@ variable "key_vault_resource_group_name" {
 variable "key_vault_secret_environment_variables" {
   type    = map(string)
   default = {}
+
+  validation {
+    condition = (
+      var.key_vault_name != null ||
+      length(var.key_vault_secret_environment_variables) == 0
+    )
+    error_message = "key_vault_secret_environment_variables requires key_vault_name and key_vault_resource_group_name."
+  }
 }
 
 variable "tags" {
