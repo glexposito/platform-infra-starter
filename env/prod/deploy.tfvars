@@ -6,9 +6,13 @@ app_name         = "myapp-1"
 container_image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
 container_cpu    = 0.25
 container_memory = 0.5
+exposed_ports = [
+  {
+    port     = 80
+    protocol = "TCP"
+  }
+]
 
 tags = {
   environment = "prod"
-  region      = "westeurope"
-  app         = "myapp-1"
 }
