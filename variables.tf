@@ -81,6 +81,11 @@ variable "key_vault_id" {
   default = null
 }
 
+variable "key_vault_secret_environment_variables" {
+  type    = map(string)
+  default = {}
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

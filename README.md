@@ -27,20 +27,23 @@ The `.tfvars` files define naming tokens such as `stack_name`, `app_name`, `envi
 
 The backend `.tfbackend` files define where Terraform state is stored in Azure Storage.
 
-Optional Key Vault RBAC support is included in the ACI module for an existing Key Vault:
+Optional Key Vault support is included for an existing Key Vault:
 
 - set `key_vault_id` to grant `Key Vault Secrets User` on that vault
-- leave `key_vault_id = null` to skip Key Vault RBAC entirely
+- use `key_vault_secret_environment_variables` to map container env var names to Key Vault secret names
+- leave `key_vault_id = null` to skip Key Vault integration entirely
 
-ACI can accept `secure_environment_variables`, but it does not support ACA-style secret definitions that resolve Key Vault references in the Terraform resource. If your workload needs Key Vault secrets, pass an existing `key_vault_id`, let the ACI module assign access to the container identity, and fetch the secrets from the application at runtime.
+ACI can accept `secure_environment_variables`. This repo can also read secrets from Key Vault during Terraform apply and inject them into the container as secure environment variables.
+
+Note: if Terraform reads a Key Vault secret and injects it into the container, that secret value will be handled by Terraform and may be present in Terraform state. If you want to avoid that, grant the container identity access to Key Vault and fetch the secret from the application at runtime instead.
 
 Example:
 
 ```hcl
 key_vault_id = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.KeyVault/vaults/<vault-name>"
 
-secure_environment_variables = {
-  API_KEY = "<sensitive-value>"
+key_vault_secret_environment_variables = {
+  API_TOKEN = "api-token"
 }
 ```
 
