@@ -24,17 +24,38 @@ variable "container_name" {
 }
 
 variable "container_image" {
-  type = string
-}
-
-variable "registry_server" {
   type    = string
   default = null
 }
 
-variable "acr_id" {
+variable "container_image_repository" {
   type    = string
   default = null
+}
+
+variable "container_image_tag" {
+  type    = string
+  default = "latest"
+}
+
+variable "acr_name" {
+  type    = string
+  default = null
+
+  validation {
+    condition     = (var.acr_name == null) == (var.acr_resource_group_name == null)
+    error_message = "acr_name and acr_resource_group_name must be set together."
+  }
+}
+
+variable "acr_resource_group_name" {
+  type    = string
+  default = null
+
+  validation {
+    condition     = (var.acr_resource_group_name == null) == (var.acr_name == null)
+    error_message = "acr_resource_group_name and acr_name must be set together."
+  }
 }
 
 variable "container_cpu" {
@@ -86,9 +107,24 @@ variable "secure_environment_variables" {
   sensitive = true
 }
 
-variable "key_vault_id" {
+variable "key_vault_name" {
   type    = string
   default = null
+
+  validation {
+    condition     = (var.key_vault_name == null) == (var.key_vault_resource_group_name == null)
+    error_message = "key_vault_name and key_vault_resource_group_name must be set together."
+  }
+}
+
+variable "key_vault_resource_group_name" {
+  type    = string
+  default = null
+
+  validation {
+    condition     = (var.key_vault_resource_group_name == null) == (var.key_vault_name == null)
+    error_message = "key_vault_resource_group_name and key_vault_name must be set together."
+  }
 }
 
 variable "key_vault_secret_environment_variables" {

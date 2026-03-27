@@ -30,17 +30,19 @@ The backend `.tfbackend` files define where Terraform state is stored in Azure S
 Private ACR images are supported with a managed identity:
 
 ```hcl
-container_image   = "myregistry.azurecr.io/myapp:latest"
-acr_id            = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.ContainerRegistry/registries/<acr-name>"
+acr_name                = "<acr-name>"
+acr_resource_group_name = "<resource-group>"
+container_image_repository = "myapp"
+container_image_tag        = "latest"
 ```
 
-When `acr_id` is set, this repository derives the ACR login server automatically, creates a user-assigned identity, grants it `AcrPull` on the registry, and configures ACI to use that identity for the image pull. If `acr_id` is null, no registry configuration is added and ACI will only be able to pull public images unless you explicitly set `registry_server` for another registry flow.
+When `acr_name` is set, this repository looks up the registry, derives the login server automatically, builds the full image reference from `container_image_repository` and `container_image_tag`, creates a user-assigned identity, grants it `AcrPull` on the registry, waits briefly for RBAC propagation, and configures ACI to use that identity for the image pull. If `acr_name` is null, set `container_image` directly for a public image instead.
 
 Optional Key Vault support is included for an existing Key Vault:
 
-- set `key_vault_id` so Terraform can read secrets from that vault
+- set `key_vault_name` and `key_vault_resource_group_name` so Terraform can look up that vault
 - use `key_vault_secret_environment_variables` to map container env var names to Key Vault secret names
-- leave `key_vault_id = null` to skip Key Vault integration entirely
+- leave `key_vault_name = null` to skip Key Vault integration entirely
 
 ACI can accept `secure_environment_variables`. This repo can also read secrets from Key Vault during Terraform apply and inject them into the container as secure environment variables.
 
@@ -49,7 +51,8 @@ Note: if Terraform reads a Key Vault secret and injects it into the container, t
 Example:
 
 ```hcl
-key_vault_id = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.KeyVault/vaults/<vault-name>"
+key_vault_name                = "<vault-name>"
+key_vault_resource_group_name = "<resource-group>"
 
 key_vault_secret_environment_variables = {
   API_TOKEN = "api-token"
