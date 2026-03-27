@@ -44,6 +44,11 @@ data "azurerm_container_registry" "this" {
 
 check "acr_image_matches_registry" {
   assert {
+    condition     = (var.acr_name == null) == (var.acr_resource_group_name == null)
+    error_message = "acr_name and acr_resource_group_name must be set together."
+  }
+
+  assert {
     condition = var.acr_name == null || (
       var.container_image_repository != null &&
       length(trimspace(var.container_image_repository)) > 0

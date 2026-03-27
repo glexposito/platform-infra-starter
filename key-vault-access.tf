@@ -9,6 +9,13 @@ locals {
   )
 }
 
+check "key_vault_inputs" {
+  assert {
+    condition     = (var.key_vault_name == null) == (var.key_vault_resource_group_name == null)
+    error_message = "key_vault_name and key_vault_resource_group_name must be set together."
+  }
+}
+
 data "azurerm_key_vault" "this" {
   count = var.key_vault_name == null ? 0 : 1
 
