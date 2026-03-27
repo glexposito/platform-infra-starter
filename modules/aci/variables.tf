@@ -28,6 +28,11 @@ variable "acr_pull_identity_id" {
   default = null
 }
 
+variable "subnet_ids" {
+  type    = list(string)
+  default = []
+}
+
 variable "container_cpu" {
   type = number
 }

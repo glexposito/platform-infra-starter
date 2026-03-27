@@ -38,6 +38,24 @@ container_image_tag        = "latest"
 
 When `acr_name` is set, this repository looks up the registry, derives the login server automatically, builds the full image reference from `container_image_repository` and `container_image_tag`, creates a user-assigned identity, grants it `AcrPull` on the registry, waits briefly for RBAC propagation, and configures ACI to use that identity for the image pull. If `acr_name` is null, set `container_image` directly for a public image instead.
 
+Private ACI networking is supported by switching `ip_address_type` to `Private`. In that mode, this repository creates:
+
+- a VNet
+- a delegated subnet for ACI
+
+Defaults:
+
+```hcl
+ip_address_type              = "Private"
+virtual_network_address_space = ["10.0.0.0/27"]
+aci_subnet_address_prefixes   = ["10.0.0.0/28"]
+```
+
+Recommended names are generated automatically:
+
+- `vnet-<stack>-<environment>-<region>`
+- `snet-aci-<environment>-<region>`
+
 Optional Key Vault support is included for an existing Key Vault:
 
 - set `key_vault_name` and `key_vault_resource_group_name` so Terraform can look up that vault

@@ -5,6 +5,7 @@ resource "azurerm_container_group" "this" {
   os_type             = var.os_type
   ip_address_type     = var.ip_address_type
   dns_name_label      = var.dns_name_label
+  subnet_ids          = var.subnet_ids
   restart_policy      = var.restart_policy
   tags                = var.tags
 

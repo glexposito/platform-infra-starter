@@ -78,6 +78,16 @@ variable "ip_address_type" {
   default = "Public"
 }
 
+variable "virtual_network_address_space" {
+  type    = list(string)
+  default = ["10.0.0.0/27"]
+}
+
+variable "aci_subnet_address_prefixes" {
+  type    = list(string)
+  default = ["10.0.0.0/28"]
+}
+
 variable "dns_name_label" {
   type    = string
   default = null
