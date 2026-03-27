@@ -70,7 +70,8 @@ az role assignment create \
 This is separate from any access your application might need at runtime:
 
 - GitHub OIDC identity: needed so Terraform can read the secret during `plan` and `apply`
-- ACI managed identity: only needed if the deployed container should read from Key Vault at runtime, which is not configured automatically in this repository
+- GitHub OIDC identity: also needs `Owner` or `User Access Administrator` if Terraform should create RBAC assignments for the ACI managed identity
+- ACI managed identity: needs `Key Vault Secrets User` if the deployed container should read from Key Vault at runtime
 
 ## Usage
 

@@ -2,9 +2,7 @@ locals {
   resource_group_name  = "rg-${var.stack_name}-${var.environment}-${var.region_code}"
   container_group_name = "aci-${var.app_name}-${var.environment}-${var.region_code}"
   default_tags = {
-    app         = var.app_name
-    environment = var.environment
-    managed_by  = "terraform"
+    managed_by = "terraform"
   }
   tags = merge(var.tags, local.default_tags)
   key_vault_secure_environment_variables = {
