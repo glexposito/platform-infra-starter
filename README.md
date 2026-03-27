@@ -38,23 +38,16 @@ container_image_tag        = "latest"
 
 When `acr_name` is set, this repository looks up the registry, derives the login server automatically, builds the full image reference from `container_image_repository` and `container_image_tag`, creates a user-assigned identity, grants it `AcrPull` on the registry, waits briefly for RBAC propagation, and configures ACI to use that identity for the image pull. If `acr_name` is null, set `container_image` directly for a public image instead.
 
-Private ACI networking is supported by switching `ip_address_type` to `Private`. In that mode, this repository creates:
-
-- a VNet
-- a delegated subnet for ACI
-
-Defaults:
+Private ACI networking is supported by switching `ip_address_type` to `Private` and supplying an existing delegated subnet:
 
 ```hcl
-ip_address_type              = "Private"
-virtual_network_address_space = ["10.0.0.0/27"]
-aci_subnet_address_prefixes   = ["10.0.0.0/28"]
+ip_address_type             = "Private"
+network_resource_group_name = "<network-rg>"
+virtual_network_name        = "<vnet-name>"
+subnet_name                 = "<subnet-name>"
 ```
 
-Recommended names are generated automatically:
-
-- `vnet-<stack>-<environment>-<region>`
-- `snet-aci-<environment>-<region>`
+This repository does not create the VNet or subnet automatically in that mode. It looks up the existing subnet and uses its ID for the private ACI deployment. The expectation is that private networking is provided by an existing approved company network.
 
 Optional Key Vault support is included for an existing Key Vault:
 

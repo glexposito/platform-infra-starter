@@ -30,7 +30,7 @@ module "aci" {
   dns_name_label               = var.ip_address_type == "Private" ? null : var.dns_name_label
   restart_policy               = var.restart_policy
   exposed_ports                = var.exposed_ports
-  subnet_ids                   = var.ip_address_type == "Private" ? [azurerm_subnet.aci[0].id] : []
+  subnet_ids                   = var.ip_address_type == "Private" ? [data.azurerm_subnet.this[0].id] : []
   environment_variables        = var.environment_variables
   secure_environment_variables = local.merged_secure_environment_variables
   key_vault_id                 = var.key_vault_name == null ? null : data.azurerm_key_vault.this[0].id
