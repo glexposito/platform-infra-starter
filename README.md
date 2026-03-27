@@ -1,80 +1,48 @@
 # terraform-simple
 
-Minimal Terraform project for Azure Container Apps with a clean split between:
+Minimal Terraform project for a single Azure deployment that creates:
 
-- platform resources
-- container app resources
+- resource group
+- Azure Container Instance group
 
-Terraform roots:
+Terraform root:
 
-- `platform/`
-- `container-app/`
+- repository root
+
+Reusable module:
+
+- `modules/aci/`
 
 Environment values:
 
-- `env/dev/platform.tfvars`
-- `env/dev/container-app.tfvars`
-- `env/prod/platform.tfvars`
-- `env/prod/container-app.tfvars`
+- `env/dev/deploy.tfvars`
+- `env/prod/deploy.tfvars`
 
 Backend config:
 
-- `backend/dev.platform.tfbackend`
-- `backend/dev.container-app.tfbackend`
-- `backend/prod.platform.tfbackend`
-- `backend/prod.container-app.tfbackend`
+- `backend/dev.tfbackend`
+- `backend/prod.tfbackend`
 
-The `.tfvars` files only define naming tokens such as `stack_name`, `app_name`, `environment`, and `region_code`. Resource names are generated in Terraform to match the existing pattern.
+The `.tfvars` files define naming tokens such as `stack_name`, `app_name`, `environment`, and `region_code`, plus the container settings. Resource names are generated in Terraform to match the repo naming pattern.
 
-The backend `.hcl` files define where Terraform state is stored in Azure Storage.
+The backend `.tfbackend` files define where Terraform state is stored in Azure Storage.
 
-The container app `.tfvars` files also define the platform remote state lookup object used by `terraform_remote_state`.
+Optional Key Vault RBAC support is included in the ACI module for an existing Key Vault:
 
-Example:
-
-```hcl
-platform_state = {
-  resource_group_name  = "rg-aca-terraform-state"
-  storage_account_name = "acainfratfstate01"
-  container_name       = "tfstate"
-  key                  = "platform/dev/platform.tfstate"
-}
-```
-
-The `platform` stack creates:
-
-- resource group
-- storage account
-- Container Apps environment
-
-The `container-app` stack creates:
-
-- one Container App
-
-`container-app` reads the `platform` outputs through `terraform_remote_state`, so the two states stay separate.
-
-Optional Key Vault support is included for container app secrets:
-
-- set `secret_environment_variables` with `key_vault_secret_id`
-- set `key_vault_id` to grant the Container App identity `Key Vault Secrets User` on that vault
+- set `key_vault_id` to grant `Key Vault Secrets User` on that vault
 - leave `key_vault_id = null` to skip Key Vault RBAC entirely
+
+ACI can accept `secure_environment_variables`, but it does not support ACA-style secret definitions that resolve Key Vault references in the Terraform resource. If your workload needs Key Vault secrets, pass an existing `key_vault_id`, let the ACI module assign access to the container identity, and fetch the secrets from the application at runtime.
 
 Example:
 
 ```hcl
 key_vault_id = "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.KeyVault/vaults/<vault-name>"
 
-secret_environment_variables = {
-  API_KEY = {
-    secret_name         = "api-key"
-    key_vault_secret_id = "https://<vault-name>.vault.azure.net/secrets/api-key"
-  }
+secure_environment_variables = {
+  API_KEY = "<sensitive-value>"
 }
 ```
-
-To keep Azure Storage Account naming valid, the platform stack uses a short fixed prefix for that resource name:
-
-- `stplat${environment}${region_code}`
 
 ## Usage
 
@@ -85,56 +53,38 @@ Update the backend files with your real Terraform state storage values before ru
 - `container_name`
 - `key`
 
-Initialize and apply platform first:
+Initialize and apply for `dev`:
 
 ```bash
-cd platform
-terraform init -backend-config=../backend/dev.platform.tfbackend
-terraform plan -var-file=../env/dev/platform.tfvars
-terraform apply -var-file=../env/dev/platform.tfvars
-```
-
-Then initialize and apply container app:
-
-```bash
-cd container-app
-terraform init -backend-config=../backend/dev.container-app.tfbackend
-terraform plan -var-file=../env/dev/container-app.tfvars
-terraform apply -var-file=../env/dev/container-app.tfvars
+terraform init -backend-config=backend/dev.tfbackend
+terraform plan -var-file=env/dev/deploy.tfvars
+terraform apply -var-file=env/dev/deploy.tfvars
 ```
 
 For production, use:
 
-- `../backend/prod.platform.tfbackend`
-- `../backend/prod.container-app.tfbackend`
-- `../env/prod/platform.tfvars`
-- `../env/prod/container-app.tfvars`
+- `backend/prod.tfbackend`
+- `env/prod/deploy.tfvars`
 
 ## GitHub Actions
 
-There are two independent manual workflows:
+There is one manual workflow:
 
-- `.github/workflows/deploy-platform.yml`
-- `.github/workflows/deploy-container-app.yml`
+- `.github/workflows/deploy.yml`
 
-Both workflows let you choose:
+It lets you choose:
 
 - `environment`: `dev` or `prod`
 - `command`: `plan` or `apply`
 
-The platform workflow uses the matching backend file:
+It uses the matching backend and tfvars files:
 
-- `dev` -> `backend/dev.platform.tfbackend`
-- `prod` -> `backend/prod.platform.tfbackend`
-
-The container app workflow uses the matching backend file. The platform remote state lookup is defined in the container app `.tfvars` file for each environment:
-
-- `dev` -> `backend/dev.container-app.tfbackend` and `platform/dev/platform.tfstate`
-- `prod` -> `backend/prod.container-app.tfbackend` and `platform/prod/platform.tfstate`
+- `dev` -> `backend/dev.tfbackend` and `env/dev/deploy.tfvars`
+- `prod` -> `backend/prod.tfbackend` and `env/prod/deploy.tfvars`
 
 ## Notes
 
 - Backend blocks use `azurerm`.
 - Update the backend `.tfbackend` files if your Terraform state storage values differ from this setup.
 - Resource names match the existing repo naming pattern.
-- This project keeps the resource definitions directly in `platform/` and `container-app/`, split into small files by concern to stay simple and readable.
+- The root configuration stays small, while `modules/aci/` keeps the ACI resource reusable.

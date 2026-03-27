@@ -1,10 +1,5 @@
-variable "platform_state" {
-  type = object({
-    resource_group_name  = string
-    storage_account_name = string
-    container_name       = string
-    key                  = string
-  })
+variable "location" {
+  type = string
 }
 
 variable "region_code" {
@@ -12,6 +7,10 @@ variable "region_code" {
 }
 
 variable "environment" {
+  type = string
+}
+
+variable "stack_name" {
   type = string
 }
 
@@ -34,23 +33,36 @@ variable "container_cpu" {
 }
 
 variable "container_memory" {
-  type    = string
-  default = "0.5Gi"
-}
-
-variable "min_replicas" {
   type    = number
-  default = 1
+  default = 0.5
 }
 
-variable "max_replicas" {
-  type    = number
-  default = 1
-}
-
-variable "revision_mode" {
+variable "os_type" {
   type    = string
-  default = "Single"
+  default = "Linux"
+}
+
+variable "ip_address_type" {
+  type    = string
+  default = "Public"
+}
+
+variable "dns_name_label" {
+  type    = string
+  default = null
+}
+
+variable "restart_policy" {
+  type    = string
+  default = "Always"
+}
+
+variable "exposed_ports" {
+  type = list(object({
+    port     = number
+    protocol = optional(string, "TCP")
+  }))
+  default = []
 }
 
 variable "environment_variables" {
@@ -58,12 +70,8 @@ variable "environment_variables" {
   default = {}
 }
 
-variable "secret_environment_variables" {
-  type = map(object({
-    secret_name         = string
-    secret_value        = optional(string)
-    key_vault_secret_id = optional(string)
-  }))
+variable "secure_environment_variables" {
+  type      = map(string)
   default   = {}
   sensitive = true
 }

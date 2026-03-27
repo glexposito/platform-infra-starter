@@ -1,5 +1,5 @@
-name: Deploy Container App
-run-name: Deploy Container App (${{ inputs.environment }} / ${{ inputs.command }})
+name: Deploy
+run-name: Deploy (${{ inputs.environment }} / ${{ inputs.command }})
 
 on:
   workflow_dispatch:
@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environment_name: ${{ steps.resolve.outputs.environment_name }}
-      container_app_tfvars: ${{ steps.resolve.outputs.container_app_tfvars }}
-      container_app_backend_config: ${{ steps.resolve.outputs.container_app_backend_config }}
+      tfvars_file: ${{ steps.resolve.outputs.tfvars_file }}
+      backend_config: ${{ steps.resolve.outputs.backend_config }}
     steps:
       - name: Resolve deployment config
         id: resolve
@@ -49,13 +49,13 @@ jobs:
           env_mapping = {
               "dev": {
                   "environment_name": "dev",
-                  "container_app_tfvars": "env/dev/container-app.tfvars",
-                  "container_app_backend_config": "backend/dev.container-app.tfbackend",
+                  "tfvars_file": "env/dev/deploy.tfvars",
+                  "backend_config": "backend/dev.tfbackend",
               },
               "prod": {
                   "environment_name": "prod",
-                  "container_app_tfvars": "env/prod/container-app.tfvars",
-                  "container_app_backend_config": "backend/prod.container-app.tfbackend",
+                  "tfvars_file": "env/prod/deploy.tfvars",
+                  "backend_config": "backend/prod.tfbackend",
               },
           }
 
@@ -70,10 +70,10 @@ jobs:
   deploy:
     needs: prepare_deployment
     runs-on: ubuntu-latest
-    name: Deploy Container App (${{ needs.prepare_deployment.outputs.environment_name }})
+    name: Deploy (${{ needs.prepare_deployment.outputs.environment_name }})
     environment: ${{ needs.prepare_deployment.outputs.environment_name }}
     concurrency:
-      group: container-app-deploy-${{ needs.prepare_deployment.outputs.environment_name }}
+      group: deploy-${{ needs.prepare_deployment.outputs.environment_name }}
       cancel-in-progress: false
     env:
       ARM_USE_OIDC: true
@@ -97,14 +97,11 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Terraform init
-        working-directory: container-app
-        run: terraform init -backend-config="../${{ needs.prepare_deployment.outputs.container_app_backend_config }}"
+        run: terraform init -backend-config="${{ needs.prepare_deployment.outputs.backend_config }}"
 
       - name: Terraform plan
-        working-directory: container-app
-        run: terraform plan -var-file="../${{ needs.prepare_deployment.outputs.container_app_tfvars }}"
+        run: terraform plan -var-file="${{ needs.prepare_deployment.outputs.tfvars_file }}"
 
       - name: Terraform apply
         if: inputs.command == 'apply'
-        working-directory: container-app
-        run: terraform apply -auto-approve -var-file="../${{ needs.prepare_deployment.outputs.container_app_tfvars }}"
+        run: terraform apply -auto-approve -var-file="${{ needs.prepare_deployment.outputs.tfvars_file }}"
