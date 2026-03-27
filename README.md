@@ -29,7 +29,7 @@ The backend `.tfbackend` files define where Terraform state is stored in Azure S
 
 Optional Key Vault support is included for an existing Key Vault:
 
-- set `key_vault_id` to grant `Key Vault Secrets User` on that vault
+- set `key_vault_id` so Terraform can read secrets from that vault
 - use `key_vault_secret_environment_variables` to map container env var names to Key Vault secret names
 - leave `key_vault_id = null` to skip Key Vault integration entirely
 
@@ -46,6 +46,31 @@ key_vault_secret_environment_variables = {
   API_TOKEN = "api-token"
 }
 ```
+
+If Terraform reads a secret from Key Vault during `plan` or `apply`, the identity running Terraform also needs Key Vault data-plane access. In GitHub Actions, that means the GitHub OIDC application must have a role such as `Key Vault Secrets User` on the vault.
+
+Why this is needed:
+
+- `data.azurerm_key_vault_secret` is executed by Terraform during `plan` and `apply`
+- in this repository, Terraform runs as the GitHub Actions OIDC identity
+- the ACI managed identity does not exist until deployment time, so it cannot help Terraform read the secret earlier
+- because of that, the GitHub OIDC identity must be allowed to read the Key Vault secret if Terraform is the component injecting it into the container environment
+
+If you also want Terraform to create Azure RBAC role assignments, the GitHub OIDC identity needs RBAC-management permission as well, such as `Owner` or `User Access Administrator` at the relevant scope. This is separate from secret-read access. Being `Owner` helps Terraform create role assignments, but Key Vault secret reads still rely on Key Vault data-plane authorization being effective for the identity running Terraform.
+
+Example:
+
+```bash
+az role assignment create \
+  --assignee "<AZURE_CLIENT_ID>" \
+  --role "Key Vault Secrets User" \
+  --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.KeyVault/vaults/<vault-name>"
+```
+
+This is separate from any access your application might need at runtime:
+
+- GitHub OIDC identity: needed so Terraform can read the secret during `plan` and `apply`
+- ACI managed identity: only needed if the deployed container should read from Key Vault at runtime, which is not configured automatically in this repository
 
 ## Usage
 
